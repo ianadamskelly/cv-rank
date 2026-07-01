@@ -15,7 +15,7 @@ Rubric-first CV readiness checker for Kuza Kizazi.
 
 ## Suggested domain
 
-Use `cvrank.kuzakizazi.com` for the checker. It is clear and pairs well with `cv.kuzakizazi.com`.
+Use `www.cvrank.kuzakizazi.com` for the checker while DNS/proxy routing is configured that way. It is clear and pairs well with `cv.kuzakizazi.com`.
 
 Other options:
 
@@ -63,13 +63,13 @@ If you deploy with Docker Compose, keep the `cvrank_data` volume attached so pai
 Set the Flutterwave redirect URL to:
 
 ```txt
-https://cvrank.kuzakizazi.com/payment/complete
+https://www.cvrank.kuzakizazi.com/payment/complete
 ```
 
 Set the webhook URL to:
 
 ```txt
-https://cvrank.kuzakizazi.com/api/payments/flutterwave/webhook
+https://www.cvrank.kuzakizazi.com/api/payments/flutterwave/webhook
 ```
 
 The app verifies successful transactions server-side before unlocking the report download.
