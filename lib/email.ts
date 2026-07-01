@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import type { AnalysisResult } from "@/lib/types";
+import { getAppUrl } from "@/lib/url";
 
 export async function sendReportReadyEmail(input: {
   to?: string;
@@ -10,7 +11,7 @@ export async function sendReportReadyEmail(input: {
   if (!input.to || !process.env.RESEND_API_KEY) return { skipped: true };
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = getAppUrl();
   const downloadUrl = `${appUrl}/api/reports/${input.reportId}/download`;
   const from = process.env.RESEND_FROM || "CV Rank <onboarding@resend.dev>";
 
