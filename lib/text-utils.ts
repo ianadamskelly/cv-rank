@@ -4,8 +4,12 @@ const urlPattern = /(https?:\/\/|www\.|linkedin\.com|github\.com|behance\.net|dr
 const datePattern = /\b(20\d{2}|19\d{2}|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|present|current)\b/i;
 const metricPattern =
   /\b(\d+%|\d+\+|\$|kes|ksh|usd|£|€|\d+\s?(clients|users|customers|students|projects|sales|revenue|team|people|staff|months|years|days|hours|campaigns|branches|regions|followers|engagement|budget|leads))\b/i;
+const impactMetricPattern =
+  /\b(\d+%|\d+\+|\$|kes|ksh|usd|£|€|\d+\s?(clients|users|customers|students|projects|sales|revenue|team members|people|staff|campaigns|branches|regions|followers|engagement|budget|leads|reports|records|assets|websites|applications|portals|schools|departments|sub-counties|countries))\b/i;
 const bulletPattern = /(^|\n)\s*([•*-]|\d+[.)])\s+/;
 const pronounPattern = /\b(i|me|my|mine|we|our)\b/i;
+const linkedinExportPattern = /\b(page \d+ of \d+|top skills|contact[\s\S]{0,400}summary)\b/i;
+const outcomePattern = /\b(increased|reduced|improved|saved|grew|raised|cut|lowered|accelerated|shortened|expanded|generated|delivered|launched|resolved|optimized)\b/i;
 
 export const actionVerbs = [
   "achieved",
@@ -72,6 +76,18 @@ export function hasDates(text: string) {
 
 export function hasMetrics(text: string) {
   return metricPattern.test(text);
+}
+
+export function hasImpactMetrics(text: string) {
+  return impactMetricPattern.test(text);
+}
+
+export function hasOutcomeLanguage(text: string) {
+  return outcomePattern.test(text);
+}
+
+export function hasLinkedInExportArtifacts(text: string) {
+  return linkedinExportPattern.test(text);
 }
 
 export function hasBullets(text: string) {

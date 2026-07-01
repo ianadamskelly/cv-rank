@@ -7,7 +7,9 @@ import {
   hasBullets,
   hasDates,
   hasEmail,
-  hasMetrics,
+  hasImpactMetrics,
+  hasLinkedInExportArtifacts,
+  hasOutcomeLanguage,
   hasPersonalPronouns,
   hasPhone,
   hasProfessionalLink,
@@ -68,6 +70,13 @@ const commonCategories: RubricCategory[] = [
         detail: "Too little detail weakens evidence. Too much detail hides the strongest points.",
         action: "Aim for one page for students and early-career profiles, and one to two pages for experienced professionals.",
         priority: "medium"
+      }),
+      check("Clean export format", 15, ({ text }) => !hasLinkedInExportArtifacts(text), "The CV does not show obvious export artifacts.", {
+        title: "Clean up LinkedIn-export formatting",
+        detail:
+          "The extracted text looks like it may come from a LinkedIn profile export, with page labels or sidebar content mixed into the reading order. That can make screening systems and recruiters see information in the wrong sequence.",
+        action: "Rebuild the CV as a dedicated one-to-two page CV with a clear header, summary, skills, experience, education, and project/portfolio sections.",
+        priority: "high"
       }),
       check("Low parser risk", 15, ({ parseConfidence }) => parseConfidence !== "low", "The file appears reasonably parseable.", {
         title: "Reduce ATS formatting risk",
@@ -167,14 +176,14 @@ const commonCategories: RubricCategory[] = [
         action: "Begin bullets with verbs such as led, built, analyzed, improved, coordinated, delivered, or trained.",
         priority: "medium"
       }),
-      check("Quantified outcomes", 25, ({ text }) => hasMetrics(text), "The CV includes measurable evidence.", {
+      check("Quantified outcomes", 25, ({ text }) => hasImpactMetrics(text), "The CV includes measurable evidence.", {
         title: "Add numbers and scale",
         detail: "Metrics make achievements more credible and help employers understand scope.",
         action: "Add numbers where true: volume, users, clients, revenue, cost, time saved, engagement, team size, or frequency.",
         example: "Coordinated weekly reports for 6 branches, reducing manual follow-up time by 30%.",
         priority: "high"
       }),
-      check("Outcome language", 18, ({ lowerText }) => hasAny(lowerText, ["increased", "reduced", "improved", "saved", "grew", "delivered", "launched", "resolved", "optimized"]), "The CV explains results, not only tasks.", {
+      check("Outcome language", 18, ({ text }) => hasOutcomeLanguage(text), "The CV explains results, not only tasks.", {
         title: "Connect tasks to outcomes",
         detail: "Responsibility-only bullets show activity, but outcome bullets show value.",
         action: "Use a structure like Action + Scope + Result wherever possible.",
@@ -206,7 +215,7 @@ const commonCategories: RubricCategory[] = [
     name: "Role alignment",
     description: "How well the CV connects to a target role, especially when a job description is supplied.",
     checks: [
-      check("Job keyword overlap", 30, ({ words, jobDescription }) => keywordOverlap(words, jobDescription) >= 0.22, "The CV reflects a useful share of job-description language.", {
+      check("Target keyword match", 0, ({ words, jobDescription }) => !jobDescription?.trim() || keywordOverlap(words, jobDescription) >= 0.22, "No target job description was supplied, so keyword matching was treated as neutral.", {
         title: "Tailor keywords to the job description",
         detail: "When a job description is provided, the CV should naturally reflect important skills and responsibilities that truthfully match your background.",
         action: "Add matching tools, responsibilities, and domain terms from the job description where they are accurate.",
@@ -302,7 +311,7 @@ const profileCategories: Record<ProfileType, RubricCategory[]> = {
           action: "Add the tools, platforms, or systems you used in internships, projects, or first roles.",
           priority: "medium"
         }),
-        check("Workplace contribution", 20, ({ text }) => hasMetrics(text), "Some contribution is quantified.", {
+        check("Workplace contribution", 20, ({ text }) => hasImpactMetrics(text), "Some contribution is quantified.", {
           title: "Add contribution evidence",
           detail: "Even junior work can be quantified by volume, frequency, turnaround time, or number of people supported.",
           action: "Add numbers such as reports prepared weekly, customers served, records updated, or campaigns supported.",
@@ -334,7 +343,7 @@ const profileCategories: Record<ProfileType, RubricCategory[]> = {
           action: "Add examples of teams led, processes owned, budgets managed, decisions made, or stakeholders coordinated.",
           priority: "high"
         }),
-        check("Business impact", 25, ({ text }) => hasMetrics(text), "Business impact is quantified.", {
+        check("Business impact", 25, ({ text }) => hasImpactMetrics(text), "Business impact is quantified.", {
           title: "Quantify professional impact",
           detail: "Professional CVs become stronger when they show outcomes, not only job descriptions.",
           action: "Add metrics for cost, revenue, turnaround time, quality, compliance, team output, or customer outcomes.",
@@ -384,7 +393,7 @@ const profileCategories: Record<ProfileType, RubricCategory[]> = {
           action: "Group tools by design, video, photography, content, UX, motion, or publishing.",
           priority: "medium"
         }),
-        check("Creative outcomes", 15, ({ text }) => hasMetrics(text), "Creative outcomes are quantified.", {
+        check("Creative outcomes", 15, ({ text }) => hasImpactMetrics(text), "Creative outcomes are quantified.", {
           title: "Add creative performance outcomes",
           detail: "Metrics help show the business or audience value of creative work.",
           action: "Add reach, engagement, conversion, assets delivered, campaigns launched, turnaround time, or audience growth.",
@@ -410,7 +419,7 @@ const profileCategories: Record<ProfileType, RubricCategory[]> = {
           action: "List representative projects with client type, scope, duration, deliverables, and results.",
           priority: "high"
         }),
-        check("Results delivered", 23, ({ text }) => hasMetrics(text), "Results are quantified.", {
+        check("Results delivered", 23, ({ text }) => hasImpactMetrics(text), "Results are quantified.", {
           title: "Show results delivered",
           detail: "A freelancer needs to show outcomes that justify trust.",
           action: "Add metrics such as clients served, projects delivered, revenue influenced, turnaround time, retention, or performance.",
@@ -480,7 +489,7 @@ export function scoreCv(context: RubricContext, parseWarnings: string[]): Analys
     }));
     const earned = checks.reduce((sum, result) => sum + (result.passed ? result.weight : 0), 0);
     const total = checks.reduce((sum, result) => sum + result.weight, 0);
-    const score = Math.round((earned / total) * 100);
+    const score = total > 0 ? Math.round((earned / total) * 100) : 100;
     const strengths = category.checks.filter((checkItem) => checkItem.passes(context)).map((checkItem) => checkItem.strength);
     const improvements = category.checks.filter((checkItem) => !checkItem.passes(context)).map((checkItem) => checkItem.feedback);
 
@@ -545,7 +554,8 @@ function priorityRank(priority: FeedbackItem["priority"]) {
 
 function summarizeCategory(name: string, score: number, strengths: string[], improvements: FeedbackItem[]) {
   if (score >= 85) {
-    return `${name} is strong. The CV already shows ${cleanFragment(strengths[0]) ?? "solid evidence"}, so the next gains are refinement rather than repair.`;
+    const refinement = improvements[0]?.title ? ` The next useful refinement is: ${improvements[0].title}.` : "";
+    return `${name} is strong. ${sentenceCase(cleanFragment(strengths[0]) ?? "solid evidence is already visible")}.${refinement}`;
   }
   if (score >= 70) {
     return `${name} is good but not finished. The next useful fix is: ${improvements[0]?.title ?? "strengthen the weaker checks"}.`;
@@ -567,7 +577,11 @@ function summarizeOverall(score: number, profileType: ProfileType, suggestions: 
 
 function cleanFragment(value?: string) {
   if (!value) return undefined;
-  return value.replace(/\.$/, "").toLowerCase();
+  return value.replace(/\.$/, "").replace(/^the cv\s+/i, "").toLowerCase();
+}
+
+function sentenceCase(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 export function getMissingJobKeywords(context: RubricContext) {

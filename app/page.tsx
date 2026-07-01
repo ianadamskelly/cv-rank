@@ -77,10 +77,10 @@ export default function Home() {
         <section className="hero">
           <div className="hero-copy">
             <p className="eyebrow">Kuza Kizazi CV readiness checker</p>
-            <h1>Check how ready your CV is before you send it.</h1>
+            <h1>Make your CV shortlist-ready.</h1>
             <p>
-              Upload your CV, choose an optional target role, and get practical feedback based on your career stage.
-              The score is rubric-based, explainable, and built to help you improve without inventing experience.
+              Upload your CV and get a clear, practical review of its structure, evidence, role fit, and ATS readability.
+              The feedback is profile-aware, honest, and focused on helping you improve without inventing experience.
             </p>
           </div>
 
@@ -116,7 +116,7 @@ export default function Home() {
               <label htmlFor="jobDescription">Job description, optional</label>
               <textarea
                 id="jobDescription"
-                placeholder="Paste a job description to check role alignment."
+                placeholder="Paste a job description if you want the CV checked against a specific role."
                 value={jobDescription}
                 onChange={(event) => setJobDescription(event.target.value)}
               />
@@ -126,23 +126,35 @@ export default function Home() {
 
             <div className="button-row">
               <button className="button" disabled={isLoading} type="button" onClick={analyzeCv}>
-                {isLoading ? "Checking CV..." : "Check CV readiness"}
+                {isLoading ? "Reviewing CV..." : "Review my CV"}
               </button>
             </div>
           </section>
         </section>
 
         <section className="trust-strip" aria-label="Product principles">
-          <div className="trust-item">No account needed for V1.</div>
-          <div className="trust-item">English CVs only at launch.</div>
-          <div className="trust-item">Profile-specific rubric scoring.</div>
-          <div className="trust-item">Suggestions only, no automatic rewriting.</div>
+          <div className="trust-item">No account required.</div>
+          <div className="trust-item">English CVs supported.</div>
+          <div className="trust-item">Profile-specific scoring.</div>
+          <div className="trust-item">Practical suggestions, no fake rewriting.</div>
         </section>
 
         {result ? <Results result={result} /> : null}
 
         <footer className="footer">
-          Suggested production domain: <strong>cvrank.kuzakizazi.com</strong>. Use Coolify with the included Docker setup.
+          <span>All rights by Kuza Kizazi 2026.</span>
+          <a
+            aria-label="Follow BOBS ABROAD on Facebook"
+            className="social-link"
+            href="https://www.facebook.com/groups/iandesignagency"
+            rel="noreferrer"
+            target="_blank"
+          >
+            <span className="facebook-icon" aria-hidden="true">
+              f
+            </span>
+            BOBS ABROAD job postings
+          </a>
         </footer>
       </div>
     </main>
@@ -202,7 +214,7 @@ function Results({ result }: { result: AnalysisResult }) {
           <p className="muted">{result.summary}</p>
           <div className="button-row">
             <a className="button secondary" href="#paid-report">
-              Download full report
+              Get full PDF report
             </a>
             <a className="button secondary" href={builderUrl}>
               Build or fix your CV
@@ -272,8 +284,8 @@ function Results({ result }: { result: AnalysisResult }) {
         <div>
           <h2 className="section-title">Need a cleaner CV structure?</h2>
           <p className="muted">
-            If your score is limited by formatting, missing sections, or ATS readability, create a fresh CV on the Kuza
-            Kizazi CV builder and use these suggestions as your checklist.
+            If the review flags formatting, missing sections, or weak evidence, rebuild your CV on the Kuza Kizazi CV
+            builder and use these suggestions as your checklist.
           </p>
         </div>
         <a className="button" href={builderUrl}>
@@ -282,10 +294,10 @@ function Results({ result }: { result: AnalysisResult }) {
       </div>
 
       <div className="panel category" id="paid-report">
-        <h2 className="section-title">Download the full report</h2>
+        <h2 className="section-title">Download the full PDF report</h2>
         <p className="muted">
-          The paid PDF includes the full category breakdown, priority fixes, examples, strengths, and a checklist for
-          rebuilding the CV on Kuza Kizazi CV builder.
+          The PDF includes the full category breakdown, priority fixes, examples, strengths, and a section-by-section
+          improvement checklist.
         </p>
         <div className="payment-grid">
           <div className="form-row">
@@ -306,7 +318,7 @@ function Results({ result }: { result: AnalysisResult }) {
         {paymentError ? <p className="muted">{paymentError}</p> : null}
         <div className="button-row">
           <button className="button" disabled={isPaying} type="button" onClick={startPayment}>
-            {isPaying ? "Starting Flutterwave..." : "Pay and download report"}
+            {isPaying ? "Opening secure checkout..." : "Pay and download PDF"}
           </button>
         </div>
       </div>
