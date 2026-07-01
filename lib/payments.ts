@@ -1,3 +1,5 @@
+import { getAppUrl } from "@/lib/url";
+
 export type PaymentInitRequest = {
   email: string;
   name?: string;
@@ -51,6 +53,7 @@ export async function createFlutterwavePayment(input: PaymentInitRequest): Promi
   const secretKey = getFlutterwaveSecretKey();
   const amount = getReportPrice();
   const reference = makePaymentReference(input.reportId);
+  const appUrl = getAppUrl();
 
   if (!secretKey) {
     return {
@@ -72,7 +75,7 @@ export async function createFlutterwavePayment(input: PaymentInitRequest): Promi
       tx_ref: reference,
       amount,
       currency: "KES",
-      redirect_url: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/payment/complete?report_id=${input.reportId}`,
+      redirect_url: `${appUrl}/payment/complete?report_id=${input.reportId}`,
       customer: {
         email: input.email,
         name: input.name || input.email
@@ -80,7 +83,7 @@ export async function createFlutterwavePayment(input: PaymentInitRequest): Promi
       customizations: {
         title: "CV Rank Full Report",
         description: "Download the full CV readiness report",
-        logo: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/kuza-logo.png`
+        logo: `${appUrl}/kuza-logo.png`
       },
       meta: {
         report_id: input.reportId
